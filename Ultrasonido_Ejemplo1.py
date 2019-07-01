@@ -2,11 +2,18 @@ import cv2
 import numpy as np 
 import matplotlib.pyplot as plt
 
-# Se crea una funcion pra saber cual es el valor mas alto de la matriz
+# Se crea una funcion para saber cual es el valor mas alto de la matriz
 def valorMaxImagen (imagen)
     maxPixel = np.amax(imagen)
     return maxPixel
 
+# Se crea una funcion para una funcion para aplicar balance de blancos
+def balnceDeBlancos (imagen, maxPixel)
+    for i in range len(imagen)
+        for j in range len(imagen[i])
+            imagen[i][j] = (imagen[i][j]*256)//maxPixel
+             
+     
 
 # Con este codigo se muestra la imagen tal cual esta
 ultSoundOriginal = cv2.imread('prueba.jpg', 1)
