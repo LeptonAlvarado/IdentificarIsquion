@@ -10,7 +10,9 @@ def valorMaxImagen (imagen):
     print(minPixel)
     print(maxPixel)
     print(meanPixel)
+    print(imagen)
     return maxPixel
+
 
 # Se crea una funcion para una funcion para aplicar balance de blancos
 def balanceDeBlancos (imagen, maxPixel):
