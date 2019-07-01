@@ -4,8 +4,12 @@ import matplotlib.pyplot as plt
 
 # Se crea una funcion para saber cual es el valor mas alto de la matriz
 def valorMaxImagen (imagen):
-    maxPixel = np.amax(imagen)
+    maxPixel = np.max(imagen)
+    minPixel = np.min(imagen)
+    meanPixel = np.mean(imagen)
+    print(minPixel)
     print(maxPixel)
+    print(meanPixel)
     return maxPixel
 
 # Se crea una funcion para una funcion para aplicar balance de blancos
@@ -19,7 +23,7 @@ def balanceDeBlancos (imagen, maxPixel):
      
 
 # Con este codigo se muestra la imagen tal cual esta
-ultSoundOriginal = cv2.imread('prueba.jpg', 1)
+ultSoundOriginal = cv2.imread('prueba.jpg', 0)
 '''
 La imagen tiene informacion que no nos interesa,
 por lo que se recortara la parte que nos interesa 
@@ -47,53 +51,59 @@ plt.xlabel('intensidad de iluminacion')
 plt.ylabel('cantidad de pixeles')
 plt.show()
 
+clahe = cv2.createCLAHE(clipLimit=4.0, tileGridSize=(4,4))
+cl1 = clahe.apply(ultSoundTrimm)
 
-
-'''
-# Se obtiene el valor maximo de la matriz
-maxValuePixel = valorMaxImagen(ultSoundGray)
-ultSoundBW = balanceDeBlancos(ultSoundGray, maxValuePixel)
-'''
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+result = cv2.addWeighted(cl1,2,np.zeros(cl1.shape, cl1.dtype),0,50)
+cv2.imshow('cl1', result)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
 
 '''
-# Normalizacion de los datos
-norm1 = cv2.normalize(ultSoundGray, 0, 255, cv2.NORM_MINMAX)
-norm2 = cv2.normalize(ultSoundGray, 0, 255, cv2.NORM_L1)
-norm3 = cv2.normalize(ultSoundGray, 0, 255, cv2.NORM_L2)
-norm4 = cv2.normalize(ultSoundGray, 0, 255, cv2.NORM_HAMMING)
-
-cv2.imshow('Normalizacion 1', norm1)
-cv2.imshow('Normalizacion 2', norm2)
-cv2.imshow('Normalizacion 3', norm3)
-cv2.imshow('Normalizacion 4', norm4)
-
-cv2.waitKey(-1)
+equ = cv2.equalizeHist(ultSoundTrimm)
+res = np.hstack((ultSoundTrimm,equ))
+cv2.imshow('xdxd',res)
+cv2.waitKey(0)
 cv2.destroyAllWindows()
 
 
+
+cv2.imshow('xdxd',cl1)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+hist = cv2.calcHist([cl1], [0], None, [256], [0, 256])
+plt.plot(hist, color='gray' )
+
+plt.xlabel('intensidad de iluminacion')
+plt.ylabel('cantidad de pixeles')
+plt.show()
+
+
+dst = cv2.fastNlMeansDenoising(cl1,None,10,7,21)
+cv2.imshow('xdxd',dst)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+'''
+
+
+# Se obtiene el valor maximo de la matriz
+maxValuePixel = valorMaxImagen(ultSoundTrimm)
+#ultSoundBW = balanceDeBlancos(ultSoundGray, maxValuePixel)
+
+
+
+
+
+'''
+
 # Gradiante
-sobelx8u = cv2.Sobel(ultSoundTrimm,cv2.CV_8U,1,0,ksize=5)
+sobelx8u = cv2.Sobel(dst,cv2.CV_8U,1,0,ksize=5)
 #Utilizando cv2.CV_64F. Luego toma el valor absoluto y hace la conversión a cv2.CV_8U
-sobelx64f = cv2.Sobel(ultSoundTrimm,cv2.CV_64F,1,0,ksize=5)
+sobelx64f = cv2.Sobel(dst,cv2.CV_64F,1,0,ksize=5)
 abs_sobel64f = np.absolute(sobelx64f)
 sobel_8u = np.uint8(abs_sobel64f)
-plt.subplot(1,3,1),plt.imshow(ultSoundTrimm,cmap = 'gray')
+plt.subplot(1,3,1),plt.imshow(dst,cmap = 'gray')
 plt.title('Original'), plt.xticks([]), plt.yticks([])
 plt.subplot(1,3,2),plt.imshow(sobelx8u,cmap = 'gray')
 plt.title('Sobel CV_8U'), plt.xticks([]), plt.yticks([])
@@ -101,16 +111,15 @@ plt.subplot(1,3,3),plt.imshow(sobel_8u,cmap = 'gray')
 plt.title('Sobel abs(CV_64F)'), plt.xticks([]), plt.yticks([])
 plt.show()
 
-
 # Deteccion de bordes
-ultSoundGray = cv2.cvtColor(sobel_8u,cv2.COLOR_BGR2GRAY)
+ultSoundGray = dst
 ret,thresh1 = cv2.threshold(ultSoundGray,127,255,cv2.THRESH_BINARY)
 cv2.imshow('xd', thresh1)
 cv2.waitKey(0)
 contornos, hierarchy = cv2.findContours(thresh1, cv2.RETR_EXTERNAL,
             cv2.CHAIN_APPROX_SIMPLE)
-cv2.drawContours(sobel_8u, contornos, -1, (0,255,0), 3)
-cv2.imshow('ultSoundContornos', sobel_8u)
+cv2.drawContours(dst, contornos, -1, (0,255,0), 3)
+cv2.imshow('ultSoundContornos', dst)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 '''
