@@ -3,15 +3,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Se crea una funcion para saber cual es el valor mas alto de la matriz
-def valorMaxImagen (imagen)
+def valorMaxImagen (imagen):
     maxPixel = np.amax(imagen)
+    print(maxPixel)
     return maxPixel
 
 # Se crea una funcion para una funcion para aplicar balance de blancos
-def balnceDeBlancos (imagen, maxPixel)
-    for i in range len(imagen)
-        for j in range len(imagen[i])
+def balanceDeBlancos (imagen, maxPixel):
+    #imagen2BW = img.imread(imagen) 
+    for i in range (461):
+        for j in range (460):
             imagen[i][j] = (imagen[i][j]*256)//maxPixel
+    return imagen
              
      
 
@@ -44,11 +47,13 @@ plt.xlabel('intensidad de iluminacion')
 plt.ylabel('cantidad de pixeles')
 plt.show()
 
-# Convertir a grises por si las dudas
-ultSoundGray = cv2.cvtColor(ultSoundTrimm,cv2.COLOR_BGR2GRAY)
 
+
+'''
 # Se obtiene el valor maximo de la matriz
-
+maxValuePixel = valorMaxImagen(ultSoundGray)
+ultSoundBW = balanceDeBlancos(ultSoundGray, maxValuePixel)
+'''
 
 
 
