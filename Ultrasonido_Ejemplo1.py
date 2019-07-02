@@ -27,8 +27,8 @@ def balanceDeBlancos (imagen, maxPixel):
 # Con este codigo se muestra la imagen tal cual esta
 ultSoundOriginal = cv2.imread('prueba.jpg', 0)
 
-ret,thresh1 = cv2.threshold(ultSoundOriginal,0,1,cv2.THRESH_BINARY_INV)
-cv2.imshow('Sobel y', thresh1)
+ret,thresh1 = cv2.threshold(ultSoundOriginal,0,255,cv2.THRESH_BINARY)
+cv2.imshow('Umbral', thresh1)
 cv2.waitKey(0)
 cv2.destroyAllWindows();
 '''
