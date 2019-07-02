@@ -23,10 +23,10 @@ cv2.imshow('Umbral', umbralUlt )
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
-# Se hara una dilatacion de los blancos para posteriormente detectar bordes
-kernel = np.ones((5,5),np.uint8)
-dilatacion = cv2.dilate(umbralUlt,kernel,iterations = 1)
-cv2.imshow('Umbral', dilatacion )
+# Se hara un cierre de los blancos para posteriormente detectar bordes
+kernel = np.ones((3,3),np.uint8)
+cierre = cv2.morphologyEx(umbralUlt, cv2.MORPH_CLOSE, kernel)
+cv2.imshow('Umbral', cierre )
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
