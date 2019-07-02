@@ -26,12 +26,13 @@ def balanceDeBlancos (imagen, maxPixel):
 
 # Con este codigo se muestra la imagen tal cual esta
 ultSoundOriginal = cv2.imread('prueba.jpg', 0)
-'''
 
+laplacian = cv2.Laplacian(ultSoundOriginal,cv2.CV_64F)
+sobelx = cv2.Sobel(ultSoundOriginal,cv2.CV_64F,1,0,ksize=3)
+sobely = cv2.Sobel(ultSoundOriginal,cv2.CV_64F,0,1,ksize=3)
 
-
-
-
-
-
-
+cv2.imshow('La placiana', laplacian)
+cv2.imshow('Sobel x', sobelx)
+cv2.imshow('Sobel y', sobely)
+cv2.waitKey(0)
+cv2.destroyAllWindows();
