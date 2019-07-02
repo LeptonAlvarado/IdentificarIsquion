@@ -39,6 +39,7 @@ Para esto se necesita mover el cursor  en los puntos de la imagen que deseamos
 ax = plt.subplot2grid ((600, 800),(0,0), rowspan= 600, colspan=800)
 ax.imshow(ultSoundOriginal)
 plt.show()
+'''
 # Recorte de imagen = img[y, x]
 ultSoundTrimm = ultSoundOriginal[63:523, 229:690]
 cv2.imshow('ultSoundTrimm', ultSoundTrimm)
@@ -53,6 +54,44 @@ plt.xlabel('intensidad de iluminacion')
 plt.ylabel('cantidad de pixeles')
 plt.show()
 
+ruidoTrimm = ultSoundOriginal[260:523, 229:690]
+cv2.imshow('ultSoundTrimm', ruidoTrimm)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+hist = cv2.calcHist([ruidoTrimm], [0], None, [256], [0, 256])
+plt.plot(hist, color='gray' )
+
+plt.xlabel('intensidad de iluminacion')
+plt.ylabel('cantidad de pixeles')
+plt.show()
+
+isquionTrimm = ultSoundOriginal[128:250, 361:595]
+cv2.imshow('ultSoundTrimm', isquionTrimm)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+hist = cv2.calcHist([isquionTrimm], [0], None, [256], [0, 256])
+plt.plot(hist, color='gray' )
+
+plt.xlabel('intensidad de iluminacion')
+plt.ylabel('cantidad de pixeles')
+plt.show()
+'''
+negroTrimm = ultSoundOriginal[300:400, 100:200]
+cv2.imshow('ultSoundTrimm', negroTrimm)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+
+
+'''
+
+gaussiana = cv2.GaussianBlur(ultSoundTrimm, (5,5), 0)
+cv2.imshow('cl1', gaussiana)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
 clahe = cv2.createCLAHE(clipLimit=4.0, tileGridSize=(4,4))
 cl1 = clahe.apply(ultSoundTrimm)
 
@@ -60,6 +99,8 @@ result = cv2.addWeighted(cl1,2,np.zeros(cl1.shape, cl1.dtype),0,50)
 cv2.imshow('cl1', result)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
+'''
+
 
 '''
 equ = cv2.equalizeHist(ultSoundTrimm)
@@ -90,7 +131,7 @@ cv2.destroyAllWindows()
 
 
 # Se obtiene el valor maximo de la matriz
-maxValuePixel = valorMaxImagen(ultSoundTrimm)
+maxValuePixel = valorMaxImagen(negroTrimm)
 #ultSoundBW = balanceDeBlancos(ultSoundGray, maxValuePixel)
 
 
