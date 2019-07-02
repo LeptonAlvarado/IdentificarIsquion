@@ -2,7 +2,7 @@ import cv2
 import numpy as np 
 import matplotlib.pyplot as plt
 
-# Se crea una funcion para saber cual es el valor mas alto de la matriz
+# Se crea una funcion para saber caracteristicas de la matriz
 def valorMaxImagen (imagen):
     maxPixel = np.max(imagen)
     minPixel = np.min(imagen)
@@ -11,26 +11,27 @@ def valorMaxImagen (imagen):
     print(maxPixel)
     print(meanPixel)
     print(imagen)
-    return maxPixel
+    return maxPixel   
 
-
-# Se crea una funcion para una funcion para aplicar balance de blancos
-def balanceDeBlancos (imagen, maxPixel):
-    #imagen2BW = img.imread(imagen) 
-    for i in range (461):
-        for j in range (460):
-            imagen[i][j] = (imagen[i][j]*256)//maxPixel
-    return imagen
-             
-     
-
-# Con este codigo se muestra la imagen tal cual esta
+# Con este codigo se lee la imagen
 ultSoundOriginal = cv2.imread('prueba.jpg', 0)
 
-ret,thresh1 = cv2.threshold(ultSoundOriginal,0,255,cv2.THRESH_BINARY)
-cv2.imshow('Umbral', thresh1)
+ # Se aplica un umbral en el que si es diferente de 0 se haga 1
+ # https://www.pyimagesearch.com/2014/09/08/thresholding-simple-image-segmentation-using-opencv/
+ret,umbralUlt  = cv2.threshold(ultSoundOriginal,0,255,cv2.THRESH_BINARY)
+cv2.imshow('Umbral', umbralUlt )
 cv2.waitKey(0)
-cv2.destroyAllWindows();
+cv2.destroyAllWindows()
+
+# Se hara una dilatacion de los blancos para posteriormente detectar bordes
+kernel = np.ones((5,5),np.uint8)
+dilatacion = cv2.dilate(umbralUlt,kernel,iterations = 1)
+cv2.imshow('Umbral', dilatacion )
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+
+
 '''
 laplacian = cv2.Laplacian(ultSoundOriginal,cv2.CV_64F)
 sobelx = cv2.Sobel(ultSoundOriginal,cv2.CV_64F,1,0,ksize=3)
