@@ -36,3 +36,17 @@ cv2.imshow('Sobel x', sobelx)
 cv2.imshow('Sobel y', sobely)
 cv2.waitKey(0)
 cv2.destroyAllWindows();
+
+# X
+sobelx64f = cv2.Sobel(ultSoundOriginal,cv2.CV_64F,1,0,ksize=3)
+abs_sobel64f = np.absolute(sobelx64f)
+sobel_8x = np.uint8(abs_sobel64f)
+# Y
+sobelx64f = cv2.Sobel(ultSoundOriginal,cv2.CV_64F,0,1,ksize=3)
+abs_sobel64f = np.absolute(sobelx64f)
+sobel_8y = np.uint8(abs_sobel64f)
+
+cv2.imshow('Sobel x x64', sobel_8x)
+cv2.imshow('Sobel y x64', sobel_8y)
+cv2.waitKey(0)
+cv2.destroyAllWindows();
