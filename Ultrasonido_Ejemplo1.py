@@ -50,3 +50,12 @@ cv2.imshow('Sobel x x64', sobel_8x)
 cv2.imshow('Sobel y x64', sobel_8y)
 cv2.waitKey(0)
 cv2.destroyAllWindows();
+
+#valorMaxImagen (ultSoundOriginal)
+
+# Cany
+
+bordes = cv2.Canny(ultSoundOriginal,0,100)
+cv2.imshow('Caby', bordes)
+cv2.waitKey(0)
+cv2.destroyAllWindows();
