@@ -13,20 +13,24 @@ def valorMaxImagen (imagen):
     print(imagen)
     return maxPixel   
 
-# Con este codigo se lee la imagen
+########################### Obtaining the image ##########################
+# Si la imagen esta en la misma carpeta que el programa se puede poner solo el nombre de la imagen
+# Si no, se necesita poner la direccion
+# cv2.imread('imagen',bandera)
+# bandera = 0 Escala de grises, = 1 A Color, = -1 Carga la imagen como tal, incluyendo el canal alfa
 ultSoundOriginal = cv2.imread('C:/Users/josue/OneDrive/Escritorio/Ultrasonido/Dummi Right/Series_1/IT SandraITXXXX0E_Frame172.jpg', 0)
 
- # Se aplica un umbral en el que si es diferente de 0 se haga 1
- # https://www.pyimagesearch.com/2014/09/08/thresholding-simple-image-segmentation-using-opencv/
+# Se aplica un umbral en el que si es diferente de 0 se haga 1
+# https://www.pyimagesearch.com/2014/09/08/thresholding-simple-image-segmentation-using-opencv/
 ret,umbralUlt  = cv2.threshold(ultSoundOriginal,0,255,cv2.THRESH_BINARY)
-cv2.imshow('Umbral', umbralUlt )
+#cv2.imshow('Umbral', umbralUlt )
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
 # Se hara un cierre de los blancos para posteriormente detectar bordes
 kernel = np.ones((3,3),np.uint8)
 cierre = cv2.morphologyEx(umbralUlt, cv2.MORPH_CLOSE, kernel)
-cv2.imshow('Cierre', cierre )
+#cv2.imshow('Cierre', cierre )
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
@@ -38,23 +42,30 @@ erosion = cv2.erode(cierre,kernel2,iterations = 1)
 contours, hierarchy = cv2.findContours(erosion, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 # Se hara una mascara en blanco
 cv2.drawContours(ultSoundOriginal, contours, 0, (255, 0, 0), 2)
-cv2.imshow('Regiones', erosion)
-cv2.imshow('Contorno', ultSoundOriginal)
+#cv2.imshow('Regiones', erosion)
+#cv2.imshow('Contorno', ultSoundOriginal)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 print(contours[0])
 
 # Recorte de la imagen
 isquionTrimm = ultSoundOriginal[76:517, 236:685]
-cv2.imshow('ultSoundTrimm', isquionTrimm)
+#cv2.imshow('ultSoundTrimm', isquionTrimm)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
 # Eliminacion de ruido
 dst = cv2.fastNlMeansDenoising(isquionTrimm,None,7,21)
-cv2.imshow('ultSoundTrimm', dst)
+# Aplicacion de umbralizacion
+ret,umbralTrimm  = cv2.threshold(dst,1,255,cv2.THRESH_BINARY)
+cv2.imshow('ultSoundTrimm', isquionTrimm)
+cv2.imshow('Sin ruido', dst)
+cv2.imshow('Umbral Trimm', umbralTrimm)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
+
+# Contraste
+
 '''
 out = np.zeros_like(ultSoundOriginal) # Extraer el objeto y colocarlo en la imagen de salida
 # Cortar imagen
