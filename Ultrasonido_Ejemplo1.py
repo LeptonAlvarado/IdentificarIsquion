@@ -30,15 +30,19 @@ cv2.imshow('Cierre', cierre )
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
+# Se aplicara erosion para ver si se obtienen mejores contornos
+kernel2 = np.ones((12,12),np.uint8)
+erosion = cv2.erode(cierre,kernel2,iterations = 1)
+
 # Deteccion de borde
-contours, hierarchy = cv2.findContours(cierre, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+contours, hierarchy = cv2.findContours(erosion, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 cv2.drawContours(ultSoundOriginal, contours, -1, (255, 0, 0), 2)
-cv2.imshow('Contornos', cierre )
+cv2.imshow('Contornos', erosion )
 cv2.imshow('dx', ultSoundOriginal )
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
-print(contours)
+#print(contours)
 
 '''
 laplacian = cv2.Laplacian(ultSoundOriginal,cv2.CV_64F)
