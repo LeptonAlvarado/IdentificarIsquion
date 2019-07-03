@@ -14,7 +14,7 @@ def valorMaxImagen (imagen):
     return maxPixel   
 
 # Con este codigo se lee la imagen
-ultSoundOriginal = cv2.imread('prueba.jpg', 0)
+ultSoundOriginal = cv2.imread('C:/Users/josue/OneDrive/Escritorio/Ultrasonido/Dummi Right/Series_1/IT SandraITXXXX0E_Frame172.jpg', 0)
 
  # Se aplica un umbral en el que si es diferente de 0 se haga 1
  # https://www.pyimagesearch.com/2014/09/08/thresholding-simple-image-segmentation-using-opencv/
@@ -37,13 +37,24 @@ erosion = cv2.erode(cierre,kernel2,iterations = 1)
 # Deteccion de borde
 contours, hierarchy = cv2.findContours(erosion, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 # Se hara una mascara en blanco
-# mask = np.zeros_like(ultSoundOriginal)
 cv2.drawContours(ultSoundOriginal, contours, 0, (255, 0, 0), 2)
 cv2.imshow('Regiones', erosion)
 cv2.imshow('Contorno', ultSoundOriginal)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 print(contours[0])
+
+# Recorte de la imagen
+isquionTrimm = ultSoundOriginal[76:517, 236:685]
+cv2.imshow('ultSoundTrimm', isquionTrimm)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+# Eliminacion de ruido
+dst = cv2.fastNlMeansDenoising(isquionTrimm,None,7,21)
+cv2.imshow('ultSoundTrimm', dst)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
 '''
 out = np.zeros_like(ultSoundOriginal) # Extraer el objeto y colocarlo en la imagen de salida
 # Cortar imagen
