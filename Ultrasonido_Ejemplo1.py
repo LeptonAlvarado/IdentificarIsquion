@@ -36,14 +36,25 @@ erosion = cv2.erode(cierre,kernel2,iterations = 1)
 
 # Deteccion de borde
 contours, hierarchy = cv2.findContours(erosion, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-cv2.drawContours(ultSoundOriginal, contours, -1, (255, 0, 0), 2)
-cv2.imshow('Contornos', erosion )
-cv2.imshow('dx', ultSoundOriginal )
+# Se hara una mascara en blanco
+# mask = np.zeros_like(ultSoundOriginal)
+cv2.drawContours(ultSoundOriginal, contours, 0, (255, 0, 0), 2)
+cv2.imshow('Regiones', erosion)
+cv2.imshow('Contorno', ultSoundOriginal)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
-
-#print(contours)
-
+print(contours[0])
+'''
+out = np.zeros_like(ultSoundOriginal) # Extraer el objeto y colocarlo en la imagen de salida
+# Cortar imagen
+(y, x) = np.where(mask == 255)
+(topy, topx) = (np.min(y), np.min(x))
+(bottomy, bottomx) = (np.max(y), np.max(x))
+out = out[topy:bottomy+1, topx:bottomx+1]
+cv2.imshow('Output', out)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+'''
 '''
 laplacian = cv2.Laplacian(ultSoundOriginal,cv2.CV_64F)
 sobelx = cv2.Sobel(ultSoundOriginal,cv2.CV_64F,1,0,ksize=3)
