@@ -18,7 +18,7 @@ def valorMaxImagen (imagen):
 # Si no, se necesita poner la direccion
 # cv2.imread('imagen',bandera)
 # bandera = 0 Escala de grises, = 1 A Color, = -1 Carga la imagen como tal, incluyendo el canal alfa
-ultSoundOriginal = cv2.imread('C:/Users/josue/OneDrive/Escritorio/Ultrasonido/Dummi Right/Series_1/IT SandraITXXXX0E_Frame172.jpg', 0)
+ultSoundOriginal = cv2.imread('C:/Users/josue/OneDrive/Escritorio/Ultrasonido/Dummi Right/Series_1/IT SandraITXXXX0E_Frame1.jpg', 0)
 
 # Se aplica un umbral en el que si es diferente de 0 se haga 1
 # https://www.pyimagesearch.com/2014/09/08/thresholding-simple-image-segmentation-using-opencv/
@@ -64,14 +64,28 @@ apertura = cv2.morphologyEx(umbralTrimm, cv2.MORPH_OPEN, kernel3)
 # Dilatacion de la imagen
 kernel4 = np.ones((25,25),np.uint8)
 dilatacion = cv2.dilate(apertura,kernel4,iterations = 1)
-cv2.imshow('Sin ruido', dst)
-cv2.imshow('Umbral Trimm', umbralTrimm)
-cv2.imshow('Apertura', apertura)
-cv2.imshow('Diltacion', dilatacion)
+#cv2.imshow('Sin ruido', dst)
+#cv2.imshow('Umbral Trimm', umbralTrimm)
+#cv2.imshow('Apertura', apertura)
+#cv2.imshow('Diltacion', dilatacion)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
-
+# Deteccion de borde
+contornos, jerarquia = cv2.findContours(dilatacion, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+# Se hara una mascara en blanco
+#cv2.drawContours(isquionTrimm, contornos, 0, (255, 0, 0), 2)
+#cv2.imshow('Regiones Recorte', dilatacion)
+#cv2.imshow('Contorno ruido', isquionTrimm)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+#print(contornos[0])
+#print(isquionTrimm.shape)
+isquionSinRuido = isquionTrimm[0:168, 0:449]
+cv2.imshow('ultSoundTrimm', isquionTrimm)
+cv2.imshow('Isquion sin ruido', isquionSinRuido)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
 
 # Contraste
 
