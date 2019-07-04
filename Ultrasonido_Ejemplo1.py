@@ -18,7 +18,7 @@ def valorMaxImagen (imagen):
 # Si no, se necesita poner la direccion
 # cv2.imread('imagen',bandera)
 # bandera = 0 Escala de grises, = 1 A Color, = -1 Carga la imagen como tal, incluyendo el canal alfa
-ultSoundOriginal = cv2.imread('C:/Users/josue/OneDrive/Escritorio/Ultrasonido/Dummi Right/Series_1/IT SandraITXXXX0E_Frame1.jpg', 0)
+ultSoundOriginal = cv2.imread('C:/Users/josue/OneDrive/Escritorio/Ultrasonido/Dummi Right/Series_1/IT SandraITXXXX0E_Frame64.jpg', 0)
 
 # Se aplica un umbral en el que si es diferente de 0 se haga 1
 # https://www.pyimagesearch.com/2014/09/08/thresholding-simple-image-segmentation-using-opencv/
@@ -82,12 +82,51 @@ cv2.destroyAllWindows()
 #print(contornos[0])
 #print(isquionTrimm.shape)
 isquionSinRuido = isquionTrimm[0:168, 0:449]
-cv2.imshow('ultSoundTrimm', isquionTrimm)
+#cv2.imshow('ultSoundTrimm', isquionTrimm)
 cv2.imshow('Isquion sin ruido', isquionSinRuido)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
-# Contraste
+# Umbralizacion
+ret,umbralIsquion  = cv2.threshold(isquionSinRuido,5,255,cv2.THRESH_BINARY)
+cv2.imshow('Isquion sin ruido', umbralIsquion)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+
+# Erosion Isquion
+kernel5 = np.ones((2,2),np.uint8)
+erosionIsquion = cv2.erode(umbralIsquion,kernel5,iterations = 1)
+cv2.imshow('Erosion', erosionIsquion )
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+size = np.size(erosionIsquion)
+skel = np.zeros(erosionIsquion.shape,np.uint8)
+
+element = cv2.getStructuringElement(cv2.MORPH_CROSS,(3,3))
+done = False
+while( not done):
+    eroded = cv2.erode(erosionIsquion,element)
+    temp = cv2.dilate(eroded,element)
+    temp = cv2.subtract(erosionIsquion,temp)
+    skel = cv2.bitwise_or(skel,temp)
+    erosionIsquion = eroded.copy()
+ 
+    zeros = size - cv2.countNonZero(erosionIsquion)
+    if (zeros==size):
+        done = True
+
+cv2.imshow("skel",skel)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+# Dilatacion Isquion
+kernel6 = np.ones((3,3),np.uint8)
+dilatacionIsquion = cv2.dilate(erosionIsquion,kernel6,iterations = 1)
+cv2.imshow('Dilatacion Isquion', dilatacionIsquion )
+cv2.waitKey(0)
+cv2.destroyAllWindows()
 
 '''
 out = np.zeros_like(ultSoundOriginal) # Extraer el objeto y colocarlo en la imagen de salida
