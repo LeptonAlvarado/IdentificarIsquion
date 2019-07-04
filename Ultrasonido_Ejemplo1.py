@@ -46,7 +46,7 @@ cv2.drawContours(ultSoundOriginal, contours, 0, (255, 0, 0), 2)
 #cv2.imshow('Contorno', ultSoundOriginal)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
-print(contours[0])
+#print(contours[0])
 
 # Recorte de la imagen
 isquionTrimm = ultSoundOriginal[76:517, 236:685]
@@ -58,11 +58,20 @@ cv2.destroyAllWindows()
 dst = cv2.fastNlMeansDenoising(isquionTrimm,None,7,21)
 # Aplicacion de umbralizacion
 ret,umbralTrimm  = cv2.threshold(dst,1,255,cv2.THRESH_BINARY)
-cv2.imshow('ultSoundTrimm', isquionTrimm)
+# Apertura
+kernel3 = np.ones((7,7),np.uint8)
+apertura = cv2.morphologyEx(umbralTrimm, cv2.MORPH_OPEN, kernel3)
+# Dilatacion de la imagen
+kernel4 = np.ones((25,25),np.uint8)
+dilatacion = cv2.dilate(apertura,kernel4,iterations = 1)
 cv2.imshow('Sin ruido', dst)
 cv2.imshow('Umbral Trimm', umbralTrimm)
+cv2.imshow('Apertura', apertura)
+cv2.imshow('Diltacion', dilatacion)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
+
+
 
 # Contraste
 
