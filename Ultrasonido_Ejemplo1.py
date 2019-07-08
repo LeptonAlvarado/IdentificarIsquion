@@ -1,6 +1,7 @@
 import cv2
 import numpy as np 
 import matplotlib.pyplot as plt
+import scipy.ndimage.morphology as morp
 
 # Se crea una funcion para saber caracteristicas de la matriz
 def valorMaxImagen (imagen):
@@ -13,15 +14,52 @@ def valorMaxImagen (imagen):
     print(imagen)
     return maxPixel   
 
+def skeletonize(img):
+
+    struct =  np.array([  [[[0, 0, 0], [0, 1, 0], [1, 1, 1]],
+                           [[1, 1, 1], [0, 0, 0], [0, 0, 0]]],
+
+                          [[[0, 0, 0], [1, 1, 0], [0, 1, 0]],
+                           [[0, 1, 1], [0, 0, 1], [0, 0, 0]]],
+
+                          [[[0, 0, 1], [0, 1, 1], [0, 0, 1]],
+                           [[1, 0, 0], [1, 0, 0], [1, 0, 0]]],
+
+                          [[[0, 0, 0], [0, 1, 1], [0, 1, 0]],
+                           [[1, 1, 0], [1, 0, 0], [0, 0, 0]]],
+
+                          [[[1, 1, 1], [0, 1, 0], [0, 0, 0]],
+                           [[0, 0, 0], [0, 0, 0], [1, 1, 1]]],
+
+                          [[[0, 1, 0], [0, 1, 1], [0, 0, 0]],
+                           [[0, 0, 0], [1, 0, 0], [1, 1, 0]]],
+
+                          [[[1, 0, 0], [1, 1, 0], [1, 0, 0]],
+                           [[0, 0, 1], [0, 0, 1], [0, 0, 1]]],
+
+                          [[[0, 1, 0], [1, 1, 0], [0, 0, 0]],
+                           [[0, 0, 0], [0, 0, 1], [0, 1, 1]]]])
+
+
+
+    img = img.copy()
+    last = ()
+    while np.any(img != last):
+        last = img
+        for s in struct: 
+            img = np.logical_and(img, np.logical_not(morp.binary_hit_or_miss(img, *s))) 
+    return img
+
+
 ########################### Obtaining the image ##########################
 # Si la imagen esta en la misma carpeta que el programa se puede poner solo el nombre de la imagen
 # Si no, se necesita poner la direccion
 # cv2.imread('imagen',bandera)
 # bandera = 0 Escala de grises, = 1 A Color, = -1 Carga la imagen como tal, incluyendo el canal alfa
-ultSoundOriginal = cv2.imread('C:/Users/josue/OneDrive/Escritorio/Ultrasonido/Dummi Right/Series_1/IT SandraITXXXX0E_Frame64.jpg', 0)
+ultSoundOriginal = cv2.imread('C:/Users/josue/OneDrive/Escritorio/Ultrasonido/Dummi Right/Series_1/IT SandraITXXXX0E_Frame122.jpg', 0)
 
 # Se aplica un umbral en el que si es diferente de 0 se haga 1
-# https://www.pyimagesearch.com/2014/09/08/thresholding-simple-image-segmentation-using-opencv/
+# https://www.pyimagesearch.com/2014/09/08/thresholding-simple-image-segmentation-using-opencv/ 
 ret,umbralUlt  = cv2.threshold(ultSoundOriginal,0,255,cv2.THRESH_BINARY)
 #cv2.imshow('Umbral', umbralUlt )
 cv2.waitKey(0)
@@ -42,15 +80,15 @@ erosion = cv2.erode(cierre,kernel2,iterations = 1)
 contours, hierarchy = cv2.findContours(erosion, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 # Se hara una mascara en blanco
 cv2.drawContours(ultSoundOriginal, contours, 0, (255, 0, 0), 2)
-#cv2.imshow('Regiones', erosion)
-#cv2.imshow('Contorno', ultSoundOriginal)
+# cv2.imshow('Regiones', erosion)
+# cv2.imshow('Contorno', ultSoundOriginal)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 #print(contours[0])
 
 # Recorte de la imagen
 isquionTrimm = ultSoundOriginal[76:517, 236:685]
-#cv2.imshow('ultSoundTrimm', isquionTrimm)
+# cv2.imshow('ultSoundTrimm', isquionTrimm)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
@@ -64,10 +102,10 @@ apertura = cv2.morphologyEx(umbralTrimm, cv2.MORPH_OPEN, kernel3)
 # Dilatacion de la imagen
 kernel4 = np.ones((25,25),np.uint8)
 dilatacion = cv2.dilate(apertura,kernel4,iterations = 1)
-#cv2.imshow('Sin ruido', dst)
-#cv2.imshow('Umbral Trimm', umbralTrimm)
-#cv2.imshow('Apertura', apertura)
-#cv2.imshow('Diltacion', dilatacion)
+# cv2.imshow('Sin ruido', dst)
+# cv2.imshow('Umbral Trimm', umbralTrimm)
+# cv2.imshow('Apertura', apertura)
+# cv2.imshow('Diltacion', dilatacion)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
@@ -75,21 +113,21 @@ cv2.destroyAllWindows()
 contornos, jerarquia = cv2.findContours(dilatacion, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 # Se hara una mascara en blanco
 #cv2.drawContours(isquionTrimm, contornos, 0, (255, 0, 0), 2)
-#cv2.imshow('Regiones Recorte', dilatacion)
-#cv2.imshow('Contorno ruido', isquionTrimm)
+# cv2.imshow('Regiones Recorte', dilatacion)
+# cv2.imshow('Contorno ruido', isquionTrimm)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 #print(contornos[0])
 #print(isquionTrimm.shape)
 isquionSinRuido = isquionTrimm[0:168, 0:449]
-#cv2.imshow('ultSoundTrimm', isquionTrimm)
-cv2.imshow('Isquion sin ruido', isquionSinRuido)
+# cv2.imshow('ultSoundTrimm', isquionTrimm)
+# cv2.imshow('Isquion sin ruido', isquionSinRuido)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
 # Umbralizacion
 ret,umbralIsquion  = cv2.threshold(isquionSinRuido,5,255,cv2.THRESH_BINARY)
-cv2.imshow('Isquion sin ruido', umbralIsquion)
+# cv2.imshow('Isquion sin ruido', umbralIsquion)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
@@ -97,13 +135,14 @@ cv2.destroyAllWindows()
 # Erosion Isquion
 kernel5 = np.ones((2,2),np.uint8)
 erosionIsquion = cv2.erode(umbralIsquion,kernel5,iterations = 1)
-cv2.imshow('Erosion', erosionIsquion )
+#cv2.imshow('Erosion', erosionIsquion )
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
 size = np.size(erosionIsquion)
 skel = np.zeros(erosionIsquion.shape,np.uint8)
 
+#cv2.MORPH_CROSS,(3,3) No cambiar a valores menores a 3
 element = cv2.getStructuringElement(cv2.MORPH_CROSS,(3,3))
 done = False
 while( not done):
@@ -121,12 +160,29 @@ cv2.imshow("skel",skel)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
-# Dilatacion Isquion
-kernel6 = np.ones((3,3),np.uint8)
-dilatacionIsquion = cv2.dilate(erosionIsquion,kernel6,iterations = 1)
-cv2.imshow('Dilatacion Isquion', dilatacionIsquion )
+# Union de pixeles
+skelCompleto = skeletonize(skel)
+skelFinal = skeletonize(skelCompleto)
+cv2.imshow("skel Completo",skelCompleto.astype(np.uint8)*255)
+cv2.imshow("skel Final", skelFinal.astype(np.uint8)*255)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
+
+# Detectar Circulos
+copySkel = skel
+circles = cv2.HoughCircles(skel,cv2.HOUGH_GRADIENT,1,30,
+                            param1=80,param2=20,minRadius=1,maxRadius=40)
+circles = np.uint16(np.around(circles))
+for i in circles[0,:]:
+    # draw the outer circle
+    cv2.circle(copySkel,(i[0],i[1]),i[2],(0,255,0),2)
+    # draw the center of the circle
+    cv2.circle(copySkel,(i[0],i[1]),2,(0,0,255),3)
+
+cv2.imshow('detected circles',copySkel)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
 
 '''
 out = np.zeros_like(ultSoundOriginal) # Extraer el objeto y colocarlo en la imagen de salida
