@@ -1,7 +1,8 @@
 import cv2
 import numpy as np 
 import matplotlib.pyplot as plt
-import scipy.ndimage.morphology as morp
+import scipy.ndimage.morphology as m
+import scipy.signal
 
 # Se crea una funcion para saber caracteristicas de la matriz
 def valorMaxImagen (imagen):
@@ -16,40 +17,26 @@ def valorMaxImagen (imagen):
 
 def skeletonize(img):
 
-    struct =  np.array([  [[[0, 0, 0], [0, 1, 0], [1, 1, 1]],
-                           [[1, 1, 1], [0, 0, 0], [0, 0, 0]]],
-
-                          [[[0, 0, 0], [1, 1, 0], [0, 1, 0]],
-                           [[0, 1, 1], [0, 0, 1], [0, 0, 0]]],
-
-                          [[[0, 0, 1], [0, 1, 1], [0, 0, 1]],
-                           [[1, 0, 0], [1, 0, 0], [1, 0, 0]]],
-
-                          [[[0, 0, 0], [0, 1, 1], [0, 1, 0]],
-                           [[1, 1, 0], [1, 0, 0], [0, 0, 0]]],
-
-                          [[[1, 1, 1], [0, 1, 0], [0, 0, 0]],
-                           [[0, 0, 0], [0, 0, 0], [1, 1, 1]]],
-
-                          [[[0, 1, 0], [0, 1, 1], [0, 0, 0]],
-                           [[0, 0, 0], [1, 0, 0], [1, 1, 0]]],
-
-                          [[[1, 0, 0], [1, 1, 0], [1, 0, 0]],
-                           [[0, 0, 1], [0, 0, 1], [0, 0, 1]]],
-
-                          [[[0, 1, 0], [1, 1, 0], [0, 0, 0]],
-                           [[0, 0, 0], [0, 0, 1], [0, 1, 1]]]])
-
-
-
+    h1 = np.array([[0, 0, 0],[0, 1, 0],[1, 1, 1]]) 
+    m1 = np.array([[1, 1, 1],[0, 0, 0],[0, 0, 0]]) 
+    h2 = np.array([[0, 0, 0],[1, 1, 0],[0, 1, 0]]) 
+    m2 = np.array([[0, 1, 1],[0, 0, 1],[0, 0, 0]])    
+    hit_list = [] 
+    miss_list = []
+    for k in range(4): 
+        hit_list.append(np.rot90(h1, k))
+        hit_list.append(np.rot90(h2, k))
+        miss_list.append(np.rot90(m1, k))
+        miss_list.append(np.rot90(m2, k))    
     img = img.copy()
-    last = ()
-    while np.any(img != last):
+    while True:
         last = img
-        for s in struct: 
-            img = np.logical_and(img, np.logical_not(morp.binary_hit_or_miss(img, *s))) 
+        for hit, miss in zip(hit_list, miss_list): 
+            hm = m.binary_hit_or_miss(img, hit, miss) 
+            img = np.logical_and(img, np.logical_not(hm)) 
+        if np.all(img == last):  
+            break
     return img
-
 
 ########################### Obtaining the image ##########################
 # Si la imagen esta en la misma carpeta que el programa se puede poner solo el nombre de la imagen
@@ -126,8 +113,11 @@ cv2.waitKey(0)
 cv2.destroyAllWindows()
 
 # Umbralizacion
-ret,umbralIsquion  = cv2.threshold(isquionSinRuido,5,255,cv2.THRESH_BINARY)
-# cv2.imshow('Isquion sin ruido', umbralIsquion)
+ret,umbralIsquion  = cv2.threshold(isquionSinRuido,6,255,cv2.THRESH_BINARY)
+th3 = cv2.adaptiveThreshold(umbralIsquion,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
+ cv2.THRESH_BINARY,4,2)
+cv2.imshow('Umbral isquion ', umbralIsquion)
+cv2.imshow('Umbral isquion 2 ', th3)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
@@ -143,6 +133,7 @@ size = np.size(erosionIsquion)
 skel = np.zeros(erosionIsquion.shape,np.uint8)
 
 #cv2.MORPH_CROSS,(3,3) No cambiar a valores menores a 3
+# Ezqueletizacion http://opencvpython.blogspot.com/2012/05/skeletonization-using-opencv-python.html
 element = cv2.getStructuringElement(cv2.MORPH_CROSS,(3,3))
 done = False
 while( not done):
@@ -163,8 +154,34 @@ cv2.destroyAllWindows()
 # Union de pixeles
 skelCompleto = skeletonize(skel)
 skelFinal = skeletonize(skelCompleto)
-cv2.imshow("skel Completo",skelCompleto.astype(np.uint8)*255)
-cv2.imshow("skel Final", skelFinal.astype(np.uint8)*255)
+#cv2.imshow("skel Completo",skelCompleto.astype(np.uint8)*255)
+#cv2.imshow("skel Final", skelFinal.astype(np.uint8)*255)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+
+isWOR = isquionSinRuido.astype(np.float32)
+normal = cv2.normalize(isWOR,0,255,cv2.NORM_HAMMING)
+cv2.imshow("skel Chido", normal)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+'''
+ret,umbralNormal  = cv2.threshold(normal,6,255,cv2.THRESH_BINARY).astype(np.float32)
+xd = umbralNormal
+cv2.imshow("skel Chido", xd)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+#vM = valorMaxImagen(normal)
+'''
+'''
+# Detectar Lineas
+copySkel = cv2.ctvColor(skel,cv2.CV2_GRAY2BGR)
+minLineLength = 100
+maxLineGap = 1
+lines = cv2.HoughLinesP(copySkel,1,np.pi/180,100,minLineLength,maxLineGap)
+for x1,y1,x2,y2 in lines[0]:
+    cv2.line(skel,(x1,y1),(x2,y2),(0,255,0),2)
+cv2.imshow('detected lines',skel)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
@@ -182,7 +199,7 @@ for i in circles[0,:]:
 cv2.imshow('detected circles',copySkel)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
-
+'''
 
 '''
 out = np.zeros_like(ultSoundOriginal) # Extraer el objeto y colocarlo en la imagen de salida
