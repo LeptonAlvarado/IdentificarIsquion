@@ -6,11 +6,11 @@ import os
 def nombreImagen (path_carpeta):
     imgList = []
     items = os.listdir(path_carpeta)
-    for file in items:
+    for imagen in items:
         # Si todo esta bien entrara a esta parte del codigo
-         try:
+        try:
             # En esta parte se lee la imagen
-            nombre = file
+            nombre = imagen
             # Dentro del parentesis se pone todo lo que esta antes de los numeros del nombre de la imagen
             separacion = nombre.split('IT SandraITXXXX0E_Frame')
             # Se pone int al comienzo para convertirlo a una variable de punto entero
@@ -21,7 +21,7 @@ def nombreImagen (path_carpeta):
             imgList.append(numero)
         # En caso de que encuentre un problema entrera a esta parte 
         except:
-            print('Cant import ' + file)
+            print('Cant import ' + imagen)
     
     # Regresa solo los numeros del nombre de la imagen en una lista de enteros
     return (imgList)
