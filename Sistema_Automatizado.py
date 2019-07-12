@@ -4,12 +4,11 @@ import numpy as np    # Libreria para trabajar con las matrices de las imagenes
 import os             # Libreria para leer nombre de archivos
 
 def nombreImagen (path_carpeta):
-    imgList = []
+    listaDeNombresImg = []
     items = os.listdir(path_carpeta)
     for imagen in items:
         # Si todo esta bien entrara a esta parte del codigo
         try:
-            # En esta parte se lee la imagen
             nombre = imagen
             # Dentro del parentesis se pone todo lo que esta antes de los numeros del nombre de la imagen
             separacion = nombre.split('IT SandraITXXXX0E_Frame')
@@ -18,18 +17,18 @@ def nombreImagen (path_carpeta):
             # Ahora en la variable numero se guarda el split de separacion pero esta ves el [0] que contiene el numero
             # Ya que el [1] contendria la direccion del archivo
             numero = int(separacion[1].split('.jpg')[0])
-            imgList.append(numero)
+            listaDeNombresImg.append(numero)
         # En caso de que encuentre un problema entrera a esta parte 
-        except:
-            print('Cant import ' + imagen)
+        except Exception as error:
+            print(error)
     
     # Regresa solo los numeros del nombre de la imagen en una lista de enteros
-    return (imgList)
+    return (listaDeNombresImg)
 
 def obtenerImagen(path_carpeta)
-    imgList = []
+    listaImagenes = []
     # Esta variable almacena la funcion glob la cual buscara todos los archivos con terminacion .jpg
-    files = glob.glob(my_path + '*.jpg')
+    files = glob.glob(path_carpeta + '*.jpg')
 
     # Aqui se leeran todos los archivos para poder trabajar con ellos y finalmente guardarlos
     # Esta funcion lee las imagenes de forma 1,10,100,101,102,...,109,11,110,111,...
@@ -45,10 +44,11 @@ def obtenerImagen(path_carpeta)
             cv2.imshow('aver',isquionTrimm)
             cv2.waitKey(100)
             cv2.destroyAllWindows()
+            listaImagenes.append(isquionTrimm)
             # Al final se debe crear otra carpeta con los nombres del archivo
         # En caso de que encuentre un problema entrera a esta parte 
-        except:
-            print('Cant import ' + file)
+        except Exception as error:
+            print(error)
 
 
 # Esta variable guarda la direccion de los archivos
