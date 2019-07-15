@@ -115,27 +115,18 @@ cv2.waitKey(0)
 cv2.destroyAllWindows()
 
 # Normalizacion
-isWOR = isquionSinRuido.astype(np.float32)
-normal = cv2.normalize(isWOR,0,255,cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+isWOR = isquionSinRuido
+normal = cv2.normalize(isWOR,0,255,cv2.NORM_MINMAX)
 valorImagen(normal)
-normal_8u = normal.astype(np.uint8)
-valorImagen(normal_8u)
-cv2.imshow("skel Chido", normal)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-cv2.imwrite('normal_Isquion.jpg',normal)
 
-IsquionNormalizado = cv2.imread('normal_Isquion.jpg',0)
-valorImagen(IsquionNormalizado)
-cv2.imshow("que pasa", IsquionNormalizado)
+ret,umbralNormal  = cv2.threshold(normal,0,255,cv2.THRESH_BINARY)
+cv2.imshow("Umbral normal", umbralNormal)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
-ret,umbralNormal  = cv2.threshold(IsquionNormalizado,0,255,cv2.THRESH_BINARY)
-xd = umbralNormal
-cv2.imshow("Umbral normal", xd)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-#vM = valorImagen(normal)
+
+kernel4 = np.ones((2,2),np.uint8)
+
+
 
 '''
 # Umbralizacion
