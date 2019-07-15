@@ -5,15 +5,17 @@ import scipy.ndimage.morphology as m
 import scipy.signal
 
 # Se crea una funcion para saber caracteristicas de la matriz
-def valorMaxImagen (imagen):
+def valorImagen (imagen):
     maxPixel = np.max(imagen)
     minPixel = np.min(imagen)
+    medianPixel = np.median(imagen)
     meanPixel = np.mean(imagen)
     print(minPixel)
     print(maxPixel)
+    print(medianPixel)
     print(meanPixel)
     print(imagen)
-    return maxPixel   
+       
 
 def skeletonize(img):
 
@@ -43,7 +45,7 @@ def skeletonize(img):
 # Si no, se necesita poner la direccion
 # cv2.imread('imagen',bandera)
 # bandera = 0 Escala de grises, = 1 A Color, = -1 Carga la imagen como tal, incluyendo el canal alfa
-ultSoundOriginal = cv2.imread('C:/Users/josue/OneDrive/Escritorio/Ultrasonido/Dummi Right/Series_1/IT SandraITXXXX0E_Frame122.jpg', 0)
+ultSoundOriginal = cv2.imread('C:/Users/josue/OneDrive/Escritorio/Ultrasonido/Dummi Right/Series_1/IT SandraITXXXX0E_Frame93.jpg', 0)
 
 # Se aplica un umbral en el que si es diferente de 0 se haga 1
 # https://www.pyimagesearch.com/2014/09/08/thresholding-simple-image-segmentation-using-opencv/ 
@@ -108,20 +110,54 @@ cv2.destroyAllWindows()
 #print(isquionTrimm.shape)
 isquionSinRuido = isquionTrimm[0:168, 0:449]
 # cv2.imshow('ultSoundTrimm', isquionTrimm)
-# cv2.imshow('Isquion sin ruido', isquionSinRuido)
+cv2.imshow('Isquion sin ruido', isquionSinRuido)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
+# Normalizacion
+isWOR = isquionSinRuido.astype(np.float32)
+normal = cv2.normalize(isWOR,0,255,cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+valorImagen(normal)
+normal_8u = normal.astype(np.uint8)
+valorImagen(normal_8u)
+cv2.imshow("skel Chido", normal)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+cv2.imwrite('normal_Isquion.jpg',normal)
+
+IsquionNormalizado = cv2.imread('normal_Isquion.jpg',0)
+valorImagen(IsquionNormalizado)
+cv2.imshow("que pasa", IsquionNormalizado)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+ret,umbralNormal  = cv2.threshold(IsquionNormalizado,0,255,cv2.THRESH_BINARY)
+xd = umbralNormal
+cv2.imshow("Umbral normal", xd)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+#vM = valorImagen(normal)
+
+'''
 # Umbralizacion
 ret,umbralIsquion  = cv2.threshold(isquionSinRuido,6,255,cv2.THRESH_BINARY)
+kernel5 = np.ones((3,3),np.uint8)
+apertura_Isquion = cv2.morphologyEx(umbralIsquion, cv2.MORPH_OPEN, kernel5)
+# Deteccion de borde
+contorno, jerarq = cv2.findContours(apertura_Isquion, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+# Se hara una mascara en blanco
+cv2.drawContours(isquionSinRuido, contorno, 0, (255, 0, 0), 1)
+cv2.imshow('Contorno', isquionSinRuido)
+#print(contorno[28])
+cv2.waitKey(0)
+cv2.destroyAllWindows()
 th3 = cv2.adaptiveThreshold(umbralIsquion,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
- cv2.THRESH_BINARY,4,2)
+ cv2.THRESH_BINARY_INV,3,2)
 cv2.imshow('Umbral isquion ', umbralIsquion)
 cv2.imshow('Umbral isquion 2 ', th3)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
-
-
+'''
+'''
 # Erosion Isquion
 kernel5 = np.ones((2,2),np.uint8)
 erosionIsquion = cv2.erode(umbralIsquion,kernel5,iterations = 1)
@@ -159,19 +195,6 @@ skelFinal = skeletonize(skelCompleto)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
-
-isWOR = isquionSinRuido.astype(np.float32)
-normal = cv2.normalize(isWOR,0,255,cv2.NORM_HAMMING)
-cv2.imshow("skel Chido", normal)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-'''
-ret,umbralNormal  = cv2.threshold(normal,6,255,cv2.THRESH_BINARY).astype(np.float32)
-xd = umbralNormal
-cv2.imshow("skel Chido", xd)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-#vM = valorMaxImagen(normal)
 '''
 '''
 # Detectar Lineas
@@ -244,7 +267,7 @@ cv2.imshow('Sobel y x64', sobel_8y)
 cv2.waitKey(0)
 cv2.destroyAllWindows();
 
-#valorMaxImagen (ultSoundOriginal)
+#valorImagen (ultSoundOriginal)
 
 # Cany
 
