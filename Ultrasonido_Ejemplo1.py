@@ -45,7 +45,7 @@ def skeletonize(img):
 # Si no, se necesita poner la direccion
 # cv2.imread('imagen',bandera)
 # bandera = 0 Escala de grises, = 1 A Color, = -1 Carga la imagen como tal, incluyendo el canal alfa
-ultSoundOriginal = cv2.imread('C:/Users/josue/OneDrive/Escritorio/Ultrasonido/Dummi Right/Series_1/IT SandraITXXXX0E_Frame93.jpg', 0)
+ultSoundOriginal = cv2.imread('C:/Users/josue/OneDrive/Escritorio/Ultrasonido/Dummi Right/Series_1/IT SandraITXXXX0E_Frame142.jpg', 0)
 
 # Se aplica un umbral en el que si es diferente de 0 se haga 1
 # https://www.pyimagesearch.com/2014/09/08/thresholding-simple-image-segmentation-using-opencv/ 
@@ -124,8 +124,34 @@ cv2.imshow("Umbral normal", umbralNormal)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
-kernel4 = np.ones((2,2),np.uint8)
+# Se aplicaa un cierre
+kernel5 = np.ones((4,4),np.uint8)
+cierreNormal = cv2.morphologyEx(umbralNormal, cv2.MORPH_CLOSE, kernel5)
+cv2.imshow("Cierre normal", cierreNormal)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
 
+size = np.size(cierreNormal)
+skel = np.zeros(cierreNormal.shape,np.uint8)
+
+#cv2.MORPH_CROSS,(3,3) No cambiar a valores menores a 3
+# Ezqueletizacion http://opencvpython.blogspot.com/2012/05/skeletonization-using-opencv-python.html
+element = cv2.getStructuringElement(cv2.MORPH_CROSS,(3,3))
+done = False
+while( not done):
+    eroded = cv2.erode(cierreNormal,element)
+    temp = cv2.dilate(eroded,element)
+    temp = cv2.subtract(cierreNormal,temp)
+    skel = cv2.bitwise_or(skel,temp)
+    cierreNormal = eroded.copy()
+ 
+    zeros = size - cv2.countNonZero(cierreNormal)
+    if (zeros==size):
+        done = True
+
+cv2.imshow("skel",skel)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
 
 
 '''
