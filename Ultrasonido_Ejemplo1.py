@@ -21,7 +21,7 @@ def valorImagen (imagen):
 # Si no, se necesita poner la direccion
 # cv2.imread('imagen',bandera)
 # bandera = 0 Escala de grises, = 1 A Color, = -1 Carga la imagen como tal, incluyendo el canal alfa
-ultSoundOriginal = cv2.imread('C:/Users/josue/OneDrive/Escritorio/Ultrasonido/Dummi Right/Series_1/IT SandraITXXXX0E_Frame1.jpg', 0)
+ultSoundOriginal = cv2.imread('C:/Users/josue/OneDrive/Escritorio/Ultrasonido/Dummi Right/Series_1/IT SandraITXXXX0E_Frame10.jpg', 0)
 
 # Se aplica un umbral en el que si es diferente de 0 se haga 1
 # https://www.pyimagesearch.com/2014/09/08/thresholding-simple-image-segmentation-using-opencv/ 
@@ -65,18 +65,18 @@ cv2.imshow('ultSoundTrimm', isquionTrimm)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
-normalIsqTrimm = cv2.normalize(isquionTrimm.astype(np.float32),0,255,cv2.NORM_HAMMING)
+denoisingIsquion = cv2.fastNlMeansDenoising((isquionTrimm),None,7,21)
+cv2.imshow('Eliminacion Sin Ruido', denoisingIsquion)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+normalIsqTrimm = cv2.normalize(denoisingIsquion.astype(np.float32),0,255,cv2.NORM_HAMMING)
 #valorImagen(normalIsqTrimm)
 cv2.imshow('Normalizado', normalIsqTrimm)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
-denoisingIsquion = cv2.fastNlMeansDenoising(normalIsqTrimm.astype(np.uint8),None,7,21)
-cv2.imshow('Eliminacion Sin Ruido', denoisingIsquion)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-
-equ = cv2.equalizeHist(denoisingIsquion)
+equ = cv2.equalizeHist(normalIsqTrimm.astype(np.uint8))
 cv2.imshow('Chale', equ)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
@@ -92,11 +92,7 @@ cv2.destroyAllWindows()
 
 # Deteccion de bordes
 contoursIsq, hierarchyIsq = cv2.findContours(umbralTrimm.astype(np.uint8), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-cv2.drawContours(isquionTrimm,contoursIsq,-1,(0,255,0),3)
-cv2.imshow('Contornos', isquionTrimm)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-'''
+
 mx1 = (0,0,0,0)      # biggest bounding box so far
 mx_area1 = 0
 for cont1 in contoursIsq:
@@ -105,13 +101,17 @@ for cont1 in contoursIsq:
     if area1 > mx_area1:
         mx1 = x1,y1,w1,h1
         mx_area1 = area1
+x1 += 50
+y1 += 50
+w1 += 50
+h1 += 50
 x1,y1,w1,h1 = mx1
 
-isquionBone=isquionTrimm[y:y+h,x:x+w]
+isquionBone=isquionTrimm[y1:y1+h1,x1:x1+w1]
 cv2.imshow('ultSoundTrimm', isquionBone)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
-'''
+
 
 '''
 size = np.size(cierreNormal)
