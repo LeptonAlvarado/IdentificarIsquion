@@ -21,13 +21,13 @@ def valorImagen (imagen):
 # Si no, se necesita poner la direccion
 # cv2.imread('imagen',bandera)
 # bandera = 0 Escala de grises, = 1 A Color, = -1 Carga la imagen como tal, incluyendo el canal alfa
-ultSoundOriginal = cv2.imread('C:/Users/josue/OneDrive/Escritorio/Ultrasonido/Dummi Right/Series_1/IT SandraITXXXX0E_Frame173.jpg', 0)
+ultSoundOriginal = cv2.imread('C:/Users/josue/OneDrive/Escritorio/Ultrasonido/Dummi Right/Series_1/IT SandraITXXXX0E_Frame1.jpg', 0)
 
 # Se aplica un umbral en el que si es diferente de 0 se haga 1
 # https://www.pyimagesearch.com/2014/09/08/thresholding-simple-image-segmentation-using-opencv/ 
 ret,umbralUlt  = cv2.threshold(ultSoundOriginal,0,255,cv2.THRESH_BINARY)
 #cv2.imshow('Umbral', umbralUlt )
-cv2.waitKey(0)
+cv2.waitKey(0) 
 cv2.destroyAllWindows()
 
 # Se hara un cierre de los blancos para posteriormente detectar bordes
@@ -66,54 +66,49 @@ cv2.waitKey(0)
 cv2.destroyAllWindows()
 
 normalIsqTrimm = cv2.normalize(isquionTrimm.astype(np.float32),0,255,cv2.NORM_HAMMING)
-valorImagen(normalIsqTrimm)
+#valorImagen(normalIsqTrimm)
 cv2.imshow('Normalizado', normalIsqTrimm)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
+denoisingIsquion = cv2.fastNlMeansDenoising(normalIsqTrimm.astype(np.uint8),None,7,21)
+cv2.imshow('Eliminacion Sin Ruido', denoisingIsquion)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+equ = cv2.equalizeHist(denoisingIsquion)
+cv2.imshow('Chale', equ)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+
 # Eliminacion de ruido
 #isquionDifuminado = cv2.fastNlMeansDenoising(isquionTrimm,None,7,21)
 # Aplicacion de umbralizacion
-ret,umbralTrimm  = cv2.threshold(normalIsqTrimm,1,255,cv2.THRESH_BINARY)
+ret,umbralTrimm  = cv2.threshold(equ,1,255,cv2.THRESH_BINARY)
 cv2.imshow('Umbral Trimm', umbralTrimm)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
+
+# Deteccion de bordes
+contoursIsq, hierarchyIsq = cv2.findContours(umbralTrimm.astype(np.uint8), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+cv2.drawContours(isquionTrimm,contoursIsq,-1,(0,255,0),3)
+cv2.imshow('Contornos', isquionTrimm)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
 '''
-# Apertura
-kernel3 = np.ones((7,7),np.uint8)
-aperturaIsquion = cv2.morphologyEx(umbralTrimm, cv2.MORPH_OPEN, kernel3)
-# Dilatacion de la imagen
-kernel4 = np.ones((25,25),np.uint8)
-dilatacion = cv2.dilate(aperturaIsquion,kernel4,iterations = 1)
-cv2.imshow('Normalizado2', normalIsqTrimm2)
-cv2.imshow('Apertura', aperturaIsquion)
-cv2.imshow('Diltacion', dilatacion)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+mx1 = (0,0,0,0)      # biggest bounding box so far
+mx_area1 = 0
+for cont1 in contoursIsq:
+    x1,y1,w1,h1 = cv2.boundingRect(cont1)
+    area1 = w1*h1
+    if area1 > mx_area1:
+        mx1 = x1,y1,w1,h1
+        mx_area1 = area1
+x1,y1,w1,h1 = mx1
 
-# Deteccion de borde
-contornos, jerarquia = cv2.findContours(dilatacion, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-# Se hara una mascara en blanco
-#cv2.drawContours(isquionTrimm, contornos, 0, (255, 0, 0), 2)
-# cv2.imshow('Regiones Recorte', dilatacion)
-# cv2.imshow('Contorno ruido', isquionTrimm)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-#print(contornos[0])
-#print(isquionTrimm.shape)
-isquionSinRuido = isquionTrimm[25:168, 25:449]
-#cv2.imshow('ultSoundTrimm', isquionTrimm)
-cv2.imshow('Isquion sin ruido', isquionSinRuido)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-
-# Normalizacion
-isWOR = isquionSinRuido
-normal = cv2.normalize(isWOR,6,255,cv2.NORM_MINMAX)
-valorImagen(normal)
-
-ret,umbralNormal  = cv2.threshold(normal,0,255,cv2.THRESH_BINARY)
-cv2.imshow("Umbral normal", umbralNormal)
+isquionBone=isquionTrimm[y:y+h,x:x+w]
+cv2.imshow('ultSoundTrimm', isquionBone)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 '''
