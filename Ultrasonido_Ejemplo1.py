@@ -101,10 +101,6 @@ for cont1 in contoursIsq:
     if area1 > mx_area1:
         mx1 = x1,y1,w1,h1
         mx_area1 = area1
-x1 += 50
-y1 += 50
-w1 += 50
-h1 += 50
 x1,y1,w1,h1 = mx1
 
 isquionBone=isquionTrimm[y1:y1+h1,x1:x1+w1]
