@@ -25,8 +25,8 @@ def nombreImagen (path_carpeta):
     # Regresa solo los numeros del nombre de la imagen en una lista de enteros
     return (listaDeNombresImg)
 
-def obtenerImagen(path_carpeta)
-    listaImagenes = []
+def obtenerImagen(path_carpeta):
+    listaUltrasonido = []
     # Esta variable almacena la funcion glob la cual buscara todos los archivos con terminacion .jpg
     files = glob.glob(path_carpeta + '*.jpg')
 
@@ -37,22 +37,58 @@ def obtenerImagen(path_carpeta)
         try:
             # En esta parte se lee la imagen
             ultraSonido = cv2.imread(file,0)
-            # Se recorta la imagen, para que solo quede la parte donde se encuentra el ultrasonido
-            ultSonTrimm = ultraSonido[76:517, 236:685] 
-            # De esa parte se recorta para dejar solo la parte del hueso
-            isquionTrimm = ultSonTrimm[0:168, 0:449]
-            cv2.imshow('aver',isquionTrimm)
+            # Se aplica un umbral
+            ret,umbralizacionUltrasonido  = cv2.threshold(ultraSonido,0,255,cv2.THRESH_BINARY)
+            
+            # Se hara un cierre a la imagen
+            kernel = np.ones((3,3),np.uint8)
+            cierreUltrasonido = cv2.morphologyEx(umbralizacionUltrasonido, cv2.MORPH_CLOSE, kernel)
+
+            # Se aplicara erosion obtener mejor contorno en el ultrasonido
+            kernel2 = np.ones((12,12),np.uint8)
+            erosionUltrasonido = cv2.erode(cierreUltrasonido,kernel2,iterations = 1)
+
+            # Deteccion de bordes
+            contornosUltrasonido, jerarquiaUltrasonido = cv2.findContours(erosionUltrasonido, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+            # https://stackoverflow.com/questions/49577973/how-to-crop-the-biggest-object-in-image-with-python-opencv
+            # Encuentra el contorno con mayor area
+            mx = (0,0,0,0)
+            mx_area = 0
+            for cont in contornosUltrasonido:
+                x,y,w,h = cv2.boundingRect(cont)
+                area = w*h
+                if area > mx_area:
+                    mx = x,y,w,h
+                    mx_area = area
+            x,y,w,h = mx
+
+            # Recorte del Isquion
+            isquionTrimm=ultraSonido[y:y+h,x:x+w]
+            cv2.imshow('ultSoundTrimm', isquionTrimm)
             cv2.waitKey(100)
             cv2.destroyAllWindows()
-            listaImagenes.append(isquionTrimm)
+            listaUltrasonido.append(isquionTrimm)
             # Al final se debe crear otra carpeta con los nombres del archivo
         # En caso de que encuentre un problema entrera a esta parte 
         except Exception as error:
             print(error)
+    return(listaUltrasonido)
 
+def obtenerIsquion(ultrasonidos = []):
+    listaIsquion = []
+    for ultrasonido in ultrasonidos:
+        try:
+            denoisingIsquion = cv2.fastNlMeansDenoising((ultrasonido),None,7,21)
+            cv2.imshow('Eliminacion Sin Ruido', denoisingIsquion)
+            cv2.waitKey(100)
+            cv2.destroyAllWindows()
+        except Exception as error:
+            print(error)
 
 # Esta variable guarda la direccion de los archivos
 my_path = 'C:/Users/josue/OneDrive/Escritorio/Ultrasonido/Dummi Right/Series_1/'
 
 nomImgs = nombreImagen(my_path)
-cutImgs = obtenerImagen(my_path)
+cutImgs = obtenerImagen(my_path) 
+obtenerIsquion(cutImgs)
