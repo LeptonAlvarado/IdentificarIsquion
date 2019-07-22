@@ -80,8 +80,27 @@ def obtenerIsquion(ultrasonidos = []):
     for ultrasonido in ultrasonidos:
         try:
             denoisingIsquion = cv2.fastNlMeansDenoising((ultrasonido),None,7,21)
-            cv2.imshow('Eliminacion Sin Ruido', denoisingIsquion)
-            cv2.waitKey(100)
+            normalizacionIsquion = cv2.normalize(denoisingIsquion.astype(np.float32),0,255,cv2.NORM_HAMMING)
+            ecualizacionIsquion = cv2.equalizeHist(normalizacionIsquion.astype(np.uint8))
+            ret,umbralIsquion  = cv2.threshold(ecualizacionIsquion,1,255,cv2.THRESH_BINARY)
+            contoursIsq, hierarchyIsq = cv2.findContours(umbralIsquion.astype(np.uint8), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+            mx1 = (0,0,0,0)      # biggest bounding box so far
+            mx_area1 = 0
+            for cont1 in contoursIsq:
+                x1,y1,w1,h1 = cv2.boundingRect(cont1)
+                area1 = w1*h1
+                if area1 > mx_area1:
+                    mx1 = x1,y1,w1,h1
+                    mx_area1 = area1
+            x1,y1,w1,h1 = mx1
+            x1 -= 25
+            y1 -= 10
+            w1 += 115
+            h1 += 100
+
+            isquionBone=ultrasonido[y1:y1+h1,x1:x1+w1]
+            cv2.imshow('ultSoundTrimm', isquionBone)
+            cv2.waitKey(1000)
             cv2.destroyAllWindows()
         except Exception as error:
             print(error)
