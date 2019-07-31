@@ -149,7 +149,7 @@ def guardarImagenes (numeroImagenes =[], imagenes=[], pathDestino,  nombreGenera
 
 
 # Esta variable guarda la direccion de los archivos
-my_path = 'C:/Users/josue/OneDrive/Escritorio/Ultrasonido/Dummi Left/Series_2/'
+my_path = 'Se escribeel path aqui'
 nombreConstanteImagen = 'IT SandraITXXXX0I_Frame'
 
 numImgs = nombreImagen(my_path, nombreConstanteImagen)
