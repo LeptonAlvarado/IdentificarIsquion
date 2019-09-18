@@ -21,7 +21,7 @@ def numeroImagen (path_carpeta, nombreGeneralImagen):
             # En la variable separacionse le pone [1] ya que el valor [0] e s todo lo que esta antes del numero
             # Ahora en la variable numero se guarda el split de separacion pero esta ves el [0] que contiene el numero
             # Ya que el [1] contendria la direccion del archivo
-            numero = int(separacion[1].split('.jpg')[0])
+            numero = separacion[1].split('.jpg')[0]
             # El numero obtenido se agrega a una lista
             listaDeNombresImg.append(numero)
         # En caso de que encuentre un problema entrera a esta parte 
@@ -107,7 +107,7 @@ def obtenerIsquion (ultrasonidos = []):
             # Umbralizacion del ultrasonido
             ret,umbralUltsound  = cv2.threshold(ecualizacionUltsound,1,255,cv2.THRESH_BINARY)
             contoursUlt, hierarchyUlt = cv2.findContours(umbralUltsound.astype(np.uint8), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-            mx1 = (0,0,0,0)      # biggest bounding box so far
+            mx1 = (0,0,0,0)      
             mx_area1 = 0
             for conts in contoursUlt:
                 x1,y1,w1,h1 = cv2.boundingRect(conts)
@@ -116,7 +116,7 @@ def obtenerIsquion (ultrasonidos = []):
                     mx1 = x1,y1,w1,h1
                     mx_area1 = area1
             x1,y1,w1,h1 = mx1
-            x1 -= 30
+            x1 -= 35
             y1 -= 12
             w1 += 115
             h1 += 100
@@ -125,11 +125,64 @@ def obtenerIsquion (ultrasonidos = []):
             isquionBone=ultrasonido[y1:y1+h1,x1:x1+w1]
             listaIsquion.append(isquionBone)
             cv2.imshow('ultSoundTrimm', isquionBone)
-            cv2.waitKey(1000)
+            cv2.waitKey(100)
             cv2.destroyAllWindows()
         except Exception as error:
             print(error)
     return(listaIsquion)
+
+def caracterizacionIsquion(isquiones):
+    listaCoordenadas = []
+    contador = 0
+    for isquion in isquiones:
+        try:
+            # Normalizacion del Isquion
+            isquionNormalizado = cv2.normalize(isquion.astype(np.float32),0,255,cv2.NORM_HAMMING)
+            cv2.imshow('Isquion Normalizado', isquionNormalizado)
+            cv2.waitKey(100)
+            cv2.destroyAllWindows()
+
+            # Umbralizacion del Isquion
+            ret, isquionUmbral = cv2.threshold(isquionNormalizado,1,255,cv2.THRESH_BINARY)
+            cv2.imshow('Isquion Umbralizado', isquionUmbral)
+            cv2.waitKey(100)
+            cv2.destroyAllWindows()
+
+            # Cierre del Isquion
+            kernel3 = np.ones((8,8),np.uint8)
+            isquionCierre = cv2.morphologyEx(isquionUmbral, cv2.MORPH_CLOSE, kernel3)
+            cv2.imshow('Cierre', isquionCierre )
+            cv2.waitKey(100)
+            cv2.destroyAllWindows()
+
+            size = np.size(isquionCierre)
+            skel = np.zeros(isquionCierre.shape,np.uint8)
+
+            #cv2.MORPH_CROSS,(3,3) No cambiar a valores menores a 3
+            # Ezqueletizacion del Isquion http://opencvpython.blogspot.com/2012/05/skeletonization-using-opencv-python.html
+            element = cv2.getStructuringElement(cv2.MORPH_CROSS,(3,3))
+            done = False
+            while( not done):
+                eroded = cv2.erode(isquionCierre.astype(np.uint8),element)
+                temp = cv2.dilate(eroded,element)
+                temp = cv2.subtract(isquionCierre.astype(np.uint8),temp)
+                skel = cv2.bitwise_or(skel,temp)
+                isquionCierre = eroded.copy()
+            
+                zeros = size - cv2.countNonZero(isquionCierre.astype(np.uint8))
+                if (zeros==size):
+                    done = True
+            listaCoordenadas.append(skel)
+            print(contador)
+            cv2.imshow("skel",skel)
+            cv2.waitKey(100)
+            cv2.destroyAllWindows()
+        except Exception as error:
+            print(error)
+    print('todo ok')        
+    return(listaCoordenadas)
+    
+    
 
 '''
 Esta funcion recibe la lista del numero de imagenes
@@ -137,21 +190,35 @@ ASi como la lista de las imagenes recortadas que se quieren guardar
 El path destino donde se guardaran las imagenes
 El nombre general con el que se guardaran las imagenes 
 '''
-def guardarImagenes (numeroImagenes =[], imagenes=[], pathDestino,  nombreGeneral):
+
+def guardarImagenes (numeroImagenes, imagenes, pathDestino,  nombreGeneral):
+    contador = 0
     for imagen in imagenes:
         try:
-            contador = 0
-            cv2.imwrite(os.path.join(pathDestino, nombreGeneral + numeroImagen[contador]+'.jpg'),imagen)
-            cv2.waitKey(0)
+            print(contador)
+            nombre = nombreGeneral + numeroImagen[contador] + '.txt'            
+            np.savetxt(os.path.join(pathDestino, nombre),imagen)
+            contador += 1 
+            '''
+            nombre = nombreGeneral + numeroImagenes[contador] + '.jpg'
+            cv2.imwrite(os.path.join(pathDestino, nombre),imagen)
             contador += 1
+            '''
         except Exception as error:
             print(error)
 
 
 # Esta variable guarda la direccion de los archivos
-my_path = 'Se escribeel path aqui'
-nombreConstanteImagen = 'IT SandraITXXXX0I_Frame'
+my_path = 'C:/Users/josue/OneDrive/Escritorio/Ultrasonido/Dummi Right/Series_1/'
+nombreConstanteImagen = 'IT SandraITXXXX0E_Frame'
+new_path = 'C:/Users/josue/OneDrive/Escritorio/Esqueletizacion/Dummi Right/Series_1/'
+new_nombre = 'Isquion EsqueletizadoXXXX0E_Frame'
 
-numImgs = nombreImagen(my_path, nombreConstanteImagen)
+numImgs = numeroImagen(my_path, nombreConstanteImagen)
 cutImgs = obtenerImagen(my_path) 
 cutIsquion = obtenerIsquion(cutImgs)
+print('inicio')
+isquionEsquel = caracterizacionIsquion(cutIsquion)
+print('inicio')
+guardarImagenes(numImgs, isquionEsquel, new_path, new_nombre)
+print(isquionEsquel)
